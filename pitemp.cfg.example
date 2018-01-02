@@ -1,0 +1,11 @@
+[pitemp]
+
+pin=22
+host=rtemp1
+url=http://192.168.1.100:8086/
+sensor=22
+
+#sensor_args = { '11': Adafruit_DHT.DHT11,
+#                '22': Adafruit_DHT.DHT22,
+#                '2302': Adafruit_DHT.AM2302 }
+

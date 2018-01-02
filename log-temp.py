@@ -1,22 +1,32 @@
 #!/usr/bin/python
 import sys
+import os
 import Adafruit_DHT
 import requests
 import time
+import six
 
-sensor=Adafruit_DHT.AM2302
-pin="23"
+if six.PY2:
+    import ConfigParser as configparser
+else:
+    import configparser
 
-sensor_args = { '11': Adafruit_DHT.DHT11,
-                '22': Adafruit_DHT.DHT22,
-                '2302': Adafruit_DHT.AM2302 }
+configParser = configparser.RawConfigParser()   
+configFilePath = os.path.expanduser('~/.pitemp.cfg')
+configParser.read(configFilePath)
 
-humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+pin  = configParser.get('pitemp', 'pin')
+host = configParser.get('pitemp', 'host')
+url  = configParser.get('pitemp', 'url')
+sensor = int(configParser.get('pitemp', 'sensor'))
+
+humidity, temperature = Adafruit_DHT.read_retry(sensor, pin, retries=3, delay_seconds=0)
 
 if humidity is not None and temperature is not None:
-	host="rtemp1"
-	data="temp_humidity,host={0:s} temp={1:0.1f},humidity={2:0.1f} {3:0.0f}000000004".format(host, temperature, humidity, time.time())
-	r = requests.post('http://192.168.1.100:8086/write?db=temp', data )
+  data="temp_humidity,host={0:s} temp={1:0.1f},humidity={2:0.1f} {3:0.0f}000000004".format(host, temperature, humidity, time.time())
+  #print data
+  #print url
+  r = requests.post(url + 'write?db=temp', data )
 else:
-    print('Failed to get reading. Try again!')
-    sys.exit(1)
+  print('Failed to get reading. Try again!')
+  sys.exit(1)
